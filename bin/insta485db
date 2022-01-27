@@ -20,7 +20,7 @@ case $1 in
         sqlite3 var/insta485.sqlite3 < sql/data.sql
         cp sql/uploads/* var/uploads/
     else
-        echo "Error: databese already exists"
+        echo "Error: database already exists"
     fi
     ;;
   "destroy")
