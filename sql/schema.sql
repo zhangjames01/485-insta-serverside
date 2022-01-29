@@ -5,15 +5,14 @@ CREATE TABLE users(
   email VARCHAR(40) NOT NULL,
   filename VARCHAR(64) NOT NULL,
   password VARCHAR(256) NOT NULL,
-  created DATETIME,
+  created DATETIME DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY(username)
 );
 CREATE TABLE posts(
-  postid int AUTO_INCREMENT,
+  postid INTEGER PRIMARY KEY AUTOINCREMENT,
   filename VARCHAR(64) NOT NULL,
   owner VARCHAR(20) NOT NULL,
-  created DATETIME,
-  PRIMARY KEY(postid),
+  created DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY(owner) REFERENCES users(username)
   CONSTRAINT posts_delete
     FOREIGN KEY (owner)
@@ -23,39 +22,51 @@ CREATE TABLE posts(
 CREATE TABLE following(
   username1 VARCHAR(20) NOT NULL,
   username2 VARCHAR(20) NOT NULL,
-  created DATETIME,
+  created DATETIME DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY(username1, username2),
   -- FOREIGN KEY (username1) REFERENCES users(username),
   -- FOREIGN KEY (username2) REFERENCES users(username),
-  FOREIGN KEY(username1, username2) REFERENCES users(username, username) ON DELETE CASCADE
-  -- CONSTRAINT username2_delete FOREIGN KEY(username2) REFERENCES users(username) ON DELETE CASCADE
+  -- FOREIGN KEY(username1) REFERENCES users(username) ON DELETE CASCADE,
+  -- FOREIGN KEY(username2) REFERENCES users(username) ON DELETE CASCADE
+  CONSTRAINT fk_key
+    FOREIGN KEY (username1) 
+    REFERENCES users (username)
+    ON DELETE CASCADE
+  CONSTRAINT fk_key_2
+    FOREIGN KEY (username2)
+    REFERENCES users (username)
+    ON DELETE CASCADE
 );
 CREATE TABLE comments(
-  commentid int AUTO_INCREMENT,
+  commentid INTEGER PRIMARY KEY AUTOINCREMENT,
   owner VARCHAR(20) NOT NULL,
-  postid int NOT NULL,
+  postid INTEGER,
   text VARCHAR(1024) NOT NULL,
-  created DATETIME,
-  PRIMARY KEY(commentid),
+  created DATETIME DEFAULT CURRENT_TIMESTAMP,
   -- FOREIGN KEY(owner) REFERENCES users(username),
   -- FOREIGN KEY(postid) REFERENCES posts(postid),
-  FOREIGN KEY(owner) REFERENCES users(username) ON DELETE CASCADE,
-  FOREIGN KEY(postid) REFERENCES posts(postid) ON DELETE CASCADE
+  CONSTRAINT fk_comments
+    FOREIGN KEY(owner) 
+    REFERENCES users(username) 
+    ON DELETE CASCADE
+  CONSTRAINT fk_comments_2
+    FOREIGN KEY(postid) 
+    REFERENCES posts(postid)
+    ON DELETE CASCADE
 );
 CREATE TABLE likes (
-  likeid int AUTO_INCREMENT,
+  likeid INTEGER PRIMARY KEY AUTOINCREMENT,
   owner VARCHAR(20) NOT NULL,
-  postid int NOT NULL,
-  created DATETIME,
-  PRIMARY KEY(likeid),
-  FOREIGN KEY (owner) REFERENCES users(username),
-  FOREIGN KEY(postid) REFERENCES posts(postid),
+  postid INTEGER,
+  created DATETIME DEFAULT CURRENT_TIMESTAMP,
+  -- FOREIGN KEY (owner) REFERENCES users(username),
+  -- FOREIGN KEY(postid) REFERENCES posts(postid),
   CONSTRAINT likes_owner_delete
-    FOREIGN KEY (owner)
+    FOREIGN KEY(owner) 
     REFERENCES users(username)
-    ON DELETE CASCADE,
+    ON DELETE CASCADE
   CONSTRAINT likes_postid_delete
-    FOREIGN KEY (postid)
+    FOREIGN KEY(postid)
     REFERENCES posts(postid)
     ON DELETE CASCADE
 );
