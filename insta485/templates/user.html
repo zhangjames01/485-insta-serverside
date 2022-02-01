@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<link href="/css/style.css" rel="stylesheet" type="text/css" />
+
+<title>insta485</title>
+
+
+<div class="topleft">
+
+    <a href="/">
+        Back to Home
+    </a>
+
+</div>
+
+<div class="topright">
+
+    <a href="/explore/">
+        Explore
+    </a>
+    |
+    <a href="/users/{{logname}}/">
+        {{logname}}
+    </a>
+
+</div>
+
+<div class="card2">
+    <h2>
+        {{username}}
+    </h2>
+    {%if logname == username%}
+    <p>
+        <a href="/accounts/edit"> Edit profile</a>
+    </p>
+    <p>
+    <form action="</accounts/login>" method="post" enctype="multipart/form-data">
+        <input type="submit" name="logout" value="Logout" />
+    </form>
+    </p>
+    {%elif logname_follows_username%}
+    <p>
+        not following
+    <form action="/following" target="/users/{{username}}/following" method="post" enctype="multipart/form-data">
+        <input type="submit" name="unfollow" value="unfollow" />
+        <input type="hidden" name="username" value="<FIXME_USERNAME_HERE>" />
+        <input type="hidden" name="operation" value="unfollow" />
+    </form>
+    </p>
+    {%else%}
+
+    <p>
+        following
+    <form action="/following" target="/users/{{username}}/following" method="post" enctype="multipart/form-data">
+        <input type="submit" name="follow" value="follow" />
+        <input type="hidden" name="username" value="<FIXME_USERNAME_HERE>" />
+        <input type="hidden" name="operation" value="follow" />
+    </form>
+    </p>
+    {%endif%}
+    <p>
+        {% if total_posts == 1 %}
+        {{total_posts}} post
+        {%else%}
+        {{total_posts}} posts
+        {%endif%} <a href="/users/{{username}}/followers/">
+            {% if followers == 1 %}
+            {{followers}} follower
+            {%else%}
+            {{followers}} followers
+            {%endif%}</a> <a href="/users/{{username}}/following/">{{following}}
+            following</a>
+    </p>
+    <p>
+        {{fullname}}
+    </p>
+    {%if logname == username%}
+    <p>
+    <form action="/posts" target="/users/{{username}}" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept="image/*" required />
+        <input type="submit" name="create_post" value="upload new post" />
+        <input type="hidden" name="operation" value="create" />
+    </form>
+    </p>
+    {%endif%}
+    {%for post in posts%}
+    <p>
+        <a href="/posts/{{post.postid}}/"> <img src="{{post.img_url}}" height="180" alt="image"></a>
+    </p>
+    {%endfor%}
+
+</div>
+
+</html>

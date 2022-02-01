@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<link href="/css/style.css" rel="stylesheet" type="text/css" />
+
+<title>insta485</title>
+
+
+<div class="topleft">
+
+    <a href="/">
+        Back to Home
+    </a>
+
+</div>
+
+<div class="topright">
+
+    <a href="/explore/">
+        Explore
+    </a>
+    |
+    <a href="/users/{{ logname }}/">
+        {{ logname }}
+    </a>
+</div>
+
+<p>
+    <img src="{{logname.user_img_url}}" height=30 alt="image">{{logname}}
+</p>
+
+<p>
+<form action="/accounts" target="/accounts/edit" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" accept="image/*" />
+    <input type="text" name="fullname" value="<FIXME_FULL_NAME_HERE>" required />
+    <input type="text" name="email" value="<FIXME_EMAIL_HERE>" required />
+    <input type="submit" name="update" value="submit" />
+    <input type="hidden" name="operation" value="edit_account" />
+</form>
+</p>
+<p>
+    <a href="/accounts/password">
+        Change password
+    </a>
+</p>
+<p>
+    <a href="/accounts/delete">
+        Delete account
+    </a>
+</p>

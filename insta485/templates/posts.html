@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<link href="/css/style.css" rel="stylesheet" type="text/css" />
+
+<title>insta485</title>
+
+
+<div class="topleft">
+
+    <a href="/">
+        Back to Home
+    </a>
+
+</div>
+
+<div class="topright">
+
+    <a href="/explore/">
+        Explore
+    </a>
+    |
+    <a href="/users/{{ logname }}/">
+        {{ logname }}
+    </a>
+
+</div>
+<div class="card1">
+
+    <div class="topright">
+        <a href="/posts/{{ postid }}/">
+            {{ timestamp }}
+        </a>
+    </div>
+    <div class="topleft">
+        <a href="/users/{{ owner }}/">
+            <img src="{{ owner_img_url }}" height=30 alt="image"> {{owner}}
+        </a>
+    </div>
+
+    .
+    <div class="img">
+        <p>
+            <img src="{{img_url}}" width="400" alt="image">
+        </p>
+        <p>
+            {% if likes == 1 %}
+            {{likes}} like
+            {%else%}
+            {{likes}} likes
+            {%endif%}
+        </p>
+        {%for comment in comments%}
+        <p>
+            <a href="/users/{{comment.owner}}/">
+                {{comment.owner}}
+            </a>
+            {{comment.text}}
+            {%if comment.owner == logname%}
+            <!-- CHECK LATER -->
+        <form action="/comments" target="/posts/{{postid}}" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="operation" value="delete" />
+            <input type="hidden" name="commentid" value="<FIXME_COMMENT_ID_HERE>" />
+            </p>
+            {%endif%}
+            {%endfor%}
+            {%if logname == owner}
+            <!-- CHECK LATER -->
+            <form action="/posts" target="/user/posts" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="operation" value="delete" />
+                <input type="hidden" name="postid" value="<FIXME_POST_ID_HERE>" />
+                <input type="submit" name="delete" value="delete this post" />
+            </form>
+            {%endif%}
+    </div>
+
+</div>

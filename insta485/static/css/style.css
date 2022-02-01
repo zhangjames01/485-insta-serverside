@@ -1,0 +1,42 @@
+    .topleft {
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
+    
+	.topright {
+		position: absolute;
+		top: 0;
+		right: 0;
+	}
+    .card1 { 
+        position: relative; 
+        top: 30px;
+        left: 30px;
+        width: 400px; 
+        height: 550px; 
+        border: 2px solid black; 
+    } 
+    .card2 { 
+        position: relative; 
+        top: 40px;
+        left: 30px;
+        height: 900px; 
+        /* border: 2px solid black;  */
+    } 
+
+    /* .elementtopright { 
+        position: absolute; 
+        top: 0; 
+        right: 0; 
+    }  
+    .elementtopleft { 
+        position: absolute; 
+        top: 0; 
+        left: 0; 
+    }   */
+    .img{
+        position: absolute;
+        width: 100%;
+        height: auto;
+    }

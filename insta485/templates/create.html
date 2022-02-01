@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<link href="/css/style.css" rel="stylesheet" type="text/css" />
+
+<title>insta485</title>
+
+<!--: if a user is already logged in, redirect to /accounts/edit/-->
+
+<head>
+    {%if username%}
+    <meta http-equiv="Refresh" content="0; url='/accounts/edit'" />
+    {%endif%}
+</head>
+
+<div class="topleft">
+
+    <a href="/">
+        Back to Home
+    </a>
+
+</div>
+
+<div class="topright">
+    <a href="/accounts/login/">
+        login
+    </a>
+</div>
+<p>
+
+    <!--FIX LATER MAYBE FOR FORM ACTION-->
+<p>
+<form action="accounts/create" target="/" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" required />
+    <input type="text" name="fullname" required />
+    <input type="text" name="username" required />
+    <input type="text" name="email" required />
+    <input type="password" name="password" required />
+    <input type="submit" name="signup" value="sign up" />
+    <input type="hidden" name="operation" value="create" />
+</form>
+</p>

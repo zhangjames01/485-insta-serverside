@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<link href="/css/style.css" rel="stylesheet" type="text/css" />
+
+<title>insta485</title>
+
+
+<div class="topleft">
+
+    <a href="/">
+        Back to Home
+    </a>
+
+</div>
+
+<div class="topright">
+
+    <a href="/explore/">
+        Explore
+    </a>
+    |
+    <a href="/users/{{logname}}/">
+        {{logname}}
+    </a>
+
+</div>
+<div>
+    {%for follow in following%}
+    {%if logname == follow.username%}
+    <p>
+        <a href="/users/{{follow.username}}/">
+            <img src="{{follow.user_img_url}}" height=30 alt="image">{{follow.username}}
+        </a>
+    </p>
+    {%elif follow.logname_follows_username%}
+    <p>
+        <a href="/users/{{follow.username}}/">
+            <img src="{{follow.user_img_url}}" height=30 alt="image">{{follow.username}}
+        </a>
+        following
+        <!-- DO NOT CHANGE THIS (aside from where we say 'FIXME') -->
+    <form action="/following" target="/users/{{username}}/following" method="post" enctype="multipart/form-data">
+        <input type="submit" name="unfollow" value="unfollow" />
+        <input type="hidden" name="username" value="<FIXME_USERNAME_HERE>" />
+        <input type="hidden" name="operation" value="unfollow" />
+    </form>
+    </p>
+    {%else%}
+    <p>
+        <a href="/users/{{follow.username}}/">
+            <img src="{{follow.user_img_url}}" height=30 alt="image">{{follow.username}}
+        </a>
+        not following
+        <!-- DO NOT CHANGE THIS (aside from where we say 'FIXME') -->
+    <form action="/following" target="/users/{{username}}/following" method="post" enctype="multipart/form-data">
+        <input type="submit" name="follow" value="follow" />
+        <input type="hidden" name="username" value="<FIXME_USERNAME_HERE>" />
+        <input type="hidden" name="operation" value="follow" />
+    </form>
+    </p>
+    {%endif%}
+    {%endfor%}
+</div>

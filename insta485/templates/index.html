@@ -1,6 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<link href="/css/style.css" rel="stylesheet" type="text/css" />
+
+<title>insta485</title>
+
+
+<div class="topleft">
+
+    <a href="/">
+        Back to Home
+    </a>
+
+</div>
+
+<div class="topright">
+
+    <a href="/explore/">
+        Explore
+    </a>
+    |
+    <a href="/users/{{ logname }}/">
+        {{ logname }}
+    </a>
+
+</div>
+{% for post in posts %}
+<div class="card1">
+
+    <div class="topright">
+        <a href="/posts/{{ post.postid }}/">
+            {{ post.timestamp }}
+        </a>
+    </div>
+    <div class="topleft">
+        <a href="/users/{{ post.owner }}/">
+            <img src="{{ post.owner_img_url }}" height=30 alt="image"> {{post.owner}}
+        </a>
+    </div>
+
+    .
+    <div class="img">
+        <p>
+            <img src="{{post.img_url}}" width="400" alt="image">
+        </p>
+        <p>
+            {% if post.likes == 1 %}
+            {{post.likes}} like
+            {%else%}
+            {{post.likes}} likes
+            {%endif%}
+        </p>
+        <p>
+            {%for users in post.postid.users%}
+            {%if owner == post.postid.user%}
+            <!-- unlike button -->
+        <form action="/likes/" target="/" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="operation" value="unlike" />
+            <input type="hidden" name="postid" value="<FIXME_POST_ID_HERE>" />
+            <input type="submit" name="unlike" value="unlike" />
+        </form>
+        {%else%}
+        <!-- like button -->
+        <form action="/likes/" target="/" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="operation" value="like" />
+            <input type="hidden" name="postid" value="<FIXME_POST_ID_HERE>" />
+            <input type="submit" name="like" value="like" />
+        </form>
+        {%endif%}
+        {%endfor%}
+        </p>
+        {%for comment in post.comments%}
+        <p>
+            <a href="/users/{{comment.owner}}/">
+                {{comment.owner}}
+            </a>
+            {{comment.text}}
+        </p>
+        {%endfor%}
+        <!-- comment button -->
+        <form action="/comments" target="/" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="operation" value="create" />
+            <input type="hidden" name="postid" value="<FIXME_POST_ID_HERE>" />
+            <input type="text" name="text" required />
+            <input type="submit" name="comment" value="comment" />
+        </form>
+    </div>
+
+</div>
+<p></p>
+{% endfor %}
+
 <body>
     <h1>Users</h1>
     {% for user in users %}
