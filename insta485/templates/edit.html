@@ -32,7 +32,7 @@
 <p>
 <form action="/accounts" target="/accounts/edit" method="post" enctype="multipart/form-data">
     <input type="file" name="file" accept="image/*" />
-    <input type="text" name="fullname" value="<FIXME_FULL_NAME_HERE>" required />
+    <input type="text" name="fullname" value="{{fullname}}" required />
     <input type="text" name="email" value="<FIXME_EMAIL_HERE>" required />
     <input type="submit" name="update" value="submit" />
     <input type="hidden" name="operation" value="edit_account" />
