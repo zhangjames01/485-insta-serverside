@@ -57,17 +57,17 @@
             {{comment.text}}
             {%if comment.owner == logname%}
             <!-- delete comment button CHECK LATER -->
-        <form action="/comments" target="/posts/{{postid}}" method="post" enctype="multipart/form-data">
+        <form action="/comments?target=/posts/{{postid}}" method="post" enctype="multipart/form-data">
             <input type="hidden" name="operation" value="delete" />
-            <input type="hidden" name="commentid" value="{{comment.id}}" />
+            <input type="hidden" name="commentid" value="{{commentid}}" />
             </p>
             {%endif%}
             {%endfor%}
             {%if logname == owner}
             <!-- delete this post button CHECK LATER -->
-            <form action="/posts" target="/user/posts" method="post" enctype="multipart/form-data">
+            <form action="/posts?target=/user/posts" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="operation" value="delete" />
-                <input type="hidden" name="postid" value="{{post.id}}" />
+                <input type="hidden" name="postid" value="{{postid}}" />
                 <input type="submit" name="delete" value="delete this post" />
             </form>
             {%endif%}

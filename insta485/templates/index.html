@@ -55,16 +55,16 @@
             {%for users in post.postid.users%}
             {%if owner == post.postid.user%}
             <!-- unlike button -->
-        <form action="/likes/" target="/" method="post" enctype="multipart/form-data">
+        <form action="/likes/?target=/" method="post" enctype="multipart/form-data">
             <input type="hidden" name="operation" value="unlike" />
-            <input type="hidden" name="postid" value="<FIXME_POST_ID_HERE>" />
+            <input type="hidden" name="postid" value="{{postid}}" />
             <input type="submit" name="unlike" value="unlike" />
         </form>
         {%else%}
         <!-- like button -->
-        <form action="/likes/" target="/" method="post" enctype="multipart/form-data">
+        <form action="/likes/?target=/" method="post" enctype="multipart/form-data">
             <input type="hidden" name="operation" value="like" />
-            <input type="hidden" name="postid" value="<FIXME_POST_ID_HERE>" />
+            <input type="hidden" name="postid" value="{{postid}}" />
             <input type="submit" name="like" value="like" />
         </form>
         {%endif%}
@@ -79,9 +79,9 @@
         </p>
         {%endfor%}
         <!-- comment button -->
-        <form action="/comments" target="/" method="post" enctype="multipart/form-data">
+        <form action="/comments?target=/" method="post" enctype="multipart/form-data">
             <input type="hidden" name="operation" value="create" />
-            <input type="hidden" name="postid" value="<FIXME_POST_ID_HERE>" />
+            <input type="hidden" name="postid" value="{{postid}}" />
             <input type="text" name="text" required />
             <input type="submit" name="comment" value="comment" />
         </form>

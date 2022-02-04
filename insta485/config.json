@@ -72,7 +72,7 @@
       "fullname": "Andrew DeOrio",
       "following": 2,
       "followers": 2,
-      "total_posts" : 2,
+      "total_posts": 2,
       "posts": [
         {
           "postid": "1",
@@ -133,7 +133,7 @@
       "fullname": "Jason Flinn",
       "following": 2,
       "followers": 1,
-      "total_posts" : 1,
+      "total_posts": 1,
       "posts": [
         {
           "postid": "2",
@@ -175,9 +175,6 @@
       ]
     }
   },
-
-
-
   {
     "url": "/users/jag/",
     "template": "user.html",
@@ -188,7 +185,7 @@
       "fullname": "H.V. Jagadish",
       "following": 1,
       "followers": 1,
-      "total_posts" : 1,
+      "total_posts": 1,
       "posts": [
         {
           "postid": "4",
@@ -235,7 +232,7 @@
       "fullname": "Michael Cafarella",
       "following": 2,
       "followers": 3,
-      "total_posts" : 0,
+      "total_posts": 0,
       "posts": []
     }
   },
