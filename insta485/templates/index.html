@@ -52,19 +52,18 @@
             {%endif%}
         </p>
         <p>
-            {%for users in post.postid.users%}
-            {%if owner == post.postid.user%}
+            {%if post.logname_likes}
             <!-- unlike button -->
         <form action="/likes/?target=/" method="post" enctype="multipart/form-data">
             <input type="hidden" name="operation" value="unlike" />
-            <input type="hidden" name="postid" value="{{postid}}" />
+            <input type="hidden" name="postid" value="{{post.postid}}" />
             <input type="submit" name="unlike" value="unlike" />
         </form>
         {%else%}
         <!-- like button -->
         <form action="/likes/?target=/" method="post" enctype="multipart/form-data">
             <input type="hidden" name="operation" value="like" />
-            <input type="hidden" name="postid" value="{{postid}}" />
+            <input type="hidden" name="postid" value="{{post.postid}}" />
             <input type="submit" name="like" value="like" />
         </form>
         {%endif%}
@@ -81,7 +80,7 @@
         <!-- comment button -->
         <form action="/comments?target=/" method="post" enctype="multipart/form-data">
             <input type="hidden" name="operation" value="create" />
-            <input type="hidden" name="postid" value="{{postid}}" />
+            <input type="hidden" name="postid" value="{{post.postid}}" />
             <input type="text" name="text" required />
             <input type="submit" name="comment" value="comment" />
         </form>

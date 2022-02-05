@@ -41,7 +41,7 @@
         <!-- DO NOT CHANGE THIS (aside from where we say 'FIXME') -->
     <form action="/following?target=/users/{{username}}/following" method="post" enctype="multipart/form-data">
         <input type="submit" name="unfollow" value="unfollow" />
-        <input type="hidden" name="username" value="{{username}}" />
+        <input type="hidden" name="username" value="{{follow.username}}" />
         <input type="hidden" name="operation" value="unfollow" />
     </form>
     </p>
@@ -54,7 +54,7 @@
         <!-- DO NOT CHANGE THIS (aside from where we say 'FIXME') -->
     <form action="/following?target=/users/{{username}}/following" method="post" enctype="multipart/form-data">
         <input type="submit" name="follow" value="follow" />
-        <input type="hidden" name="username" value="{{username}}" />
+        <input type="hidden" name="username" value="{{follow.username}}" />
         <input type="hidden" name="operation" value="follow" />
     </form>
     </p>

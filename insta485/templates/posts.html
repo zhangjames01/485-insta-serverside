@@ -59,7 +59,7 @@
             <!-- delete comment button CHECK LATER -->
         <form action="/comments?target=/posts/{{postid}}" method="post" enctype="multipart/form-data">
             <input type="hidden" name="operation" value="delete" />
-            <input type="hidden" name="commentid" value="{{commentid}}" />
+            <input type="hidden" name="commentid" value="{{comment.commentid}}" />
             </p>
             {%endif%}
             {%endfor%}
