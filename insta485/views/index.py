@@ -11,6 +11,7 @@ import os
 import pathlib
 import uuid
 import hashlib
+import arrow
 
 # /
 
@@ -29,10 +30,11 @@ def show_index():
     cur = connection.execute(
         "SELECT posts.postid, posts.owner, posts.created "
         "FROM posts "
-        "INNER JOIN following ON following.username2 = posts.owner "
-        "WHERE following.username1 = ? "
-        "OR posts.owner = ? ",
-        (logname, logname,)
+        "WHERE owner IN "
+        "(SELECT username2 FROM following WHERE username1 = ?) "
+        "OR owner = ?"
+        "ORDER BY postid DESC",
+        (logname, logname)
     )
     post_data = cur.fetchall()
     posts = []
@@ -121,7 +123,7 @@ def show_index():
                       "owner": post['owner'],
                       "owner_img_url": user_file['filename'],
                       "img_url": file['filename'],
-                      "timestamp": post['created'],
+                      "timestamp": arrow.get(post['created']).humanize(),
                       "likes": likes_data[0]['COUNT(*)'],
                       "comments": comment_list,
                       "logname_likes": logname_likes
@@ -363,12 +365,17 @@ def show_following(username):
 def show_post(postid):
     """Display /posts/<postid_url_slug>"""
 
+    if 'username' not in flask.session:
+        return flask.redirect(flask.url_for('show_login'))
+
     # Connect to database
     connection = insta485.model.get_db()
 
     # Query into database
     logname = flask.session['username']
     # Find owner and owner_img
+
+    connection = insta485.model.get_db()
     cur = connection.execute(
         "SELECT posts.owner, posts.filename "
         "FROM posts "
@@ -379,6 +386,7 @@ def show_post(postid):
     owner = cur.fetchall()
 
     # Find timestamp and img
+    connection = insta485.model.get_db()
     cur = connection.execute(
         "SELECT created, filename "
         "FROM posts "
@@ -388,6 +396,7 @@ def show_post(postid):
     created = cur.fetchall()
 
     # Find number of likes
+    connection = insta485.model.get_db()
     cur = connection.execute(
         "SELECT COUNT(*) "
         "FROM likes "
@@ -396,6 +405,7 @@ def show_post(postid):
     )
     num_likes = cur.fetchall()
 
+    connection = insta485.model.get_db()
     cur = connection.execute(
         "SELECT owner, text "
         "FROM comments "
@@ -411,9 +421,9 @@ def show_post(postid):
     context = {"logname": logname,
                "postid": postid,
                "owner": owner[0]['owner'],
-               "owner_img_url": owner[1]['filename'],
+               "owner_img_url": owner[0]['filename'],
                "img_url": created[0]['filename'],
-               "timestamp": created[1]['created'],
+               "timestamp": created[0]['created'],
                "likes": num_likes[0]['COUNT(*)'],
                "comments": comment_list
                }
@@ -467,7 +477,7 @@ def show_login():
         return flask.render_template("login.html")
 
 
-@insta485.app.route('/accounts/logout/', methods=['POST'])
+@ insta485.app.route('/accounts/logout/', methods=['POST'])
 def show_logout():
     """Display /accounts/logout"""
     flask.session.clear()
@@ -548,7 +558,7 @@ def likes():
         )
         liked = cur.fetchall()
         # If user has already liked post, abort 409
-        if (liked[0]['COUNT(*)'] == 0):
+        if (liked[0]['COUNT(*)'] != 0):
             flask.abort(409)
         connection = insta485.model.get_db()
         # Create like for postid
@@ -571,7 +581,7 @@ def likes():
         )
         liked = cur.fetchall()
         # If user has not liked post yet, abort 409
-        if (liked[0]['COUNT(*)'] != 0):
+        if (liked[0]['COUNT(*)'] == 0):
             flask.abort(409)
         # Delete like for postid
         connection = insta485.model.get_db()
@@ -961,9 +971,8 @@ def accounts():
             ([logname])
         )
         user_password = cur.fetchall()
-        user_password = user_password[0]['password'].split('$')
         password = hash_password(password)
-        if (user_password != password):
+        if (user_password[0]['password'] != password):
             flask.abort(403)
         # Verify both new passwords match
         if new_password1 != new_password2:
