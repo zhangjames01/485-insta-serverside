@@ -6,12 +6,6 @@
 
 <!--: if a user is already logged in, redirect to /accounts/edit/-->
 
-<head>
-    {%if username%}
-    <meta http-equiv="Refresh" content="0; url='/accounts/edit'" />
-    {%endif%}
-</head>
-
 <div class="topleft">
 
     <a href="/">
@@ -29,7 +23,7 @@
 
     <!--FIX LATER MAYBE FOR FORM ACTION-->
 <p>
-<form action="accounts/create?target=/" method="post" enctype="multipart/form-data">
+<form action="/accounts/?target=/" method="post" enctype="multipart/form-data">
     <input type="file" name="file" required />
     <input type="text" name="fullname" required />
     <input type="text" name="username" required />

@@ -63,7 +63,7 @@
             </p>
             {%endif%}
             {%endfor%}
-            {%if logname == owner}
+            {%if logname == owner%}
             <!-- delete this post button CHECK LATER -->
             <form action="/posts?target=/user/posts" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="operation" value="delete" />

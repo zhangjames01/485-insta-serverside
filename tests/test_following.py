@@ -63,14 +63,13 @@ def test_unfollow(client):
     assert response.status_code == 302
 
     query_string = urlencode({
-            "target": "/users/awdeorio/following/"
-        })
+        "target": "/users/awdeorio/following/"
+    })
     response = client.post(
         f"/following/?{query_string}",
         data={"operation": "unfollow", "username": "jflinn"}
     )
     assert response.status_code == 302
-
     response = client.get("/users/awdeorio/following/")
 
     soup = bs4.BeautifulSoup(response.data, "html.parser")
