@@ -139,6 +139,8 @@ def show_index():
 def show_users(username):
     """Display /users/<user_url_slug>"""
 
+    if 'username' not in flask.session:
+        return flask.redirect(flask.url_for('show_login'))
     # connect to database
     connection = insta485.model.get_db()
 
@@ -154,7 +156,7 @@ def show_users(username):
         flask.abort(404)
 
     # query
-        logname = flask.session['username']
+    logname = flask.session['username']
 
     # Find if user follows logname
     cur = connection.execute(
@@ -162,7 +164,7 @@ def show_users(username):
         "FROM following "
         "WHERE username1 = ? "
         "AND username2 = ? ",
-        ([logname], [username])
+        (logname, username)
     )
     following_status = cur.fetchall()
     if following_status[0]["COUNT(*)"] == 0:
@@ -229,9 +231,9 @@ def show_users(username):
                "username": username,
                "logname_follows_username": logname_follows_username,
                "fullname": full_name[0]['fullname'],
-               "following": num_following['COUNT(*)'],
-               "followers": num_followers['COUNT(*)'],
-               "total_posts": num_posts['COUNT(*)'],
+               "following": num_following[0]['COUNT(*)'],
+               "followers": num_followers[0]['COUNT(*)'],
+               "total_posts": num_posts[0]['COUNT(*)'],
                "posts": posts_list
                }
     return flask.render_template("user.html", **context)
@@ -242,6 +244,8 @@ def show_followers(username):
     """Display /users/<user_url_slug>/followers"""
 
     # Connect to database
+    if 'username' not in flask.session:
+        return flask.redirect(flask.url_for('show_login'))
 
     connection = insta485.model.get_db()
 
@@ -263,10 +267,10 @@ def show_followers(username):
 
     logname = flask.session['username']
     cur = connection.execute(
-        "SELECT following.username2, users.filename "
+        "SELECT following.username1, users.filename "
         "FROM following "
-        "INNER JOIN users ON following.username2=users.username "
-        "WHERE username1= ? ",
+        "INNER JOIN users ON following.username1=users.username "
+        "WHERE username2= ? ",
         ([username])
     )
     peoplefollowers = cur.fetchall()
@@ -276,25 +280,30 @@ def show_followers(username):
 
     for follower in peoplefollowers:
         cur = connection.execute(
-            "SELECT username2 "
+            "SELECT COUNT(*) "
             "FROM Following "
             "WHERE username2 = ? "
             "AND username1 = ?",
-            (peoplefollowers[0]['username2'], logname),
+            (follower['username1'], logname),
         )
         result = cur.fetchall()
-        if len(result) != 0:
-            followers.append({"username": peoplefollowers[0]['username2'],
+        count = 0
+        for person in result:
+            if person['COUNT(*)'] != 0:
+                count = 1
+        if count == 1:
+            followers.append({"username": follower['username1'],
                              "logname_follows_username": True,
-                              "user_image_url": peoplefollowers[1]['filename']
+                              "user_img_url": follower['filename']
                               })
         else:
-            followers.append({"username": peoplefollowers[0]['username2'],
+            followers.append({"username": follower['username1'],
                              "logname_follows_username": False,
-                              "user_image_url": peoplefollowers[1]['filename']
+                              "user_img_url": follower['filename']
                               })
 
     context = {"followers": followers,
+               "username": username,
                "logname": logname}
     return flask.render_template("followers.html", **context)
 
@@ -302,6 +311,9 @@ def show_followers(username):
 @ insta485.app.route('/users/<username>/following/', methods=['GET'])
 def show_following(username):
     """Display /users/<user_url_slug>/following"""
+
+    if 'username' not in flask.session:
+        return flask.redirect(flask.url_for('show_login'))
 
     # Connect to database
     connection = insta485.model.get_db()
@@ -328,7 +340,6 @@ def show_following(username):
     )
     peoplefollowed = cur.fetchall()
     following = []
-    print(len(peoplefollowed))
     for follow in peoplefollowed:
         cur = connection.execute(
             "SELECT COUNT(*) "
@@ -342,21 +353,17 @@ def show_following(username):
         for person in result:
             if person['COUNT(*)'] != 0:
                 count = 1
-
-        print(flask.send_from_directory(
-            insta485.app.config['UPLOAD_FOLDER'], follow['filename']))
         if count == 1:
-            print("Followes " + follow['username2'])
             following.append({"username": follow['username2'],
                               "logname_follows_username": True,
-                              "user_image_url": follow['filename']})
+                              "user_img_url": follow['filename']})
         else:
-            print("DOES NOT FOLLOW " + follow['username2'])
             following.append({"username": follow['username2'],
                               "logname_follows_username": False,
-                              "user_image_url": follow['filename']})
+                              "user_img_url": follow['filename']})
 
     context = {"following": following,
+               "username": username,
                "logname": logname}
     return flask.render_template("following.html", **context)
 
@@ -364,6 +371,9 @@ def show_following(username):
 @ insta485.app.route('/posts/<postid>/', methods=['GET'])
 def show_post(postid):
     """Display /posts/<postid_url_slug>"""
+
+    if 'username' not in flask.session:
+        return flask.redirect(flask.url_for('show_login'))
 
     if 'username' not in flask.session:
         return flask.redirect(flask.url_for('show_login'))
@@ -377,13 +387,13 @@ def show_post(postid):
 
     connection = insta485.model.get_db()
     cur = connection.execute(
-        "SELECT posts.owner, posts.filename "
+        "SELECT posts.owner, users.filename "
         "FROM posts "
         "INNER JOIN users ON posts.owner = users.username "
         "WHERE postid = ? ",
         ([postid])
     )
-    owner = cur.fetchall()
+    owner = cur.fetchone()
 
     # Find timestamp and img
     connection = insta485.model.get_db()
@@ -407,32 +417,61 @@ def show_post(postid):
 
     connection = insta485.model.get_db()
     cur = connection.execute(
-        "SELECT owner, text "
+        "SELECT owner, text, commentid "
         "FROM comments "
         "WHERE postid = ? ",
         ([postid])
     )
     comments = cur.fetchall()
+
+    connection = insta485.model.get_db()
+    cur = connection.execute(
+        "SELECT COUNT(*) "
+        "FROM likes "
+        "WHERE owner = ? "
+        "AND postid = ? ",
+        (logname, postid)
+    )
+    liked_check = cur.fetchall()
+    logname_likes = False
+    if liked_check[0]['COUNT(*)'] != 0:
+        logname_likes = True
+
     comment_list = []
     for comment in comments:
         comment_list.append({"owner": comment['owner'],
-                            "text": comment['text']})
+                            "text": comment['text'],
+                             "commentid": comment['commentid']})
 
     context = {"logname": logname,
                "postid": postid,
-               "owner": owner[0]['owner'],
-               "owner_img_url": owner[0]['filename'],
+               "owner": owner['owner'],
+               "owner_img_url": owner['filename'],
                "img_url": created[0]['filename'],
-               "timestamp": created[0]['created'],
+               "timestamp": arrow.get(created[0]['created']).humanize(),
                "likes": num_likes[0]['COUNT(*)'],
-               "comments": comment_list
+               "comments": comment_list,
+               "logname_likes": logname_likes
                }
+    # else:
+    #     return flask.redirect(flask.url_for('show_index'))
+    #     context = {"logname": logname,
+    #                "postid": postid,
+    #                "owner": '',
+    #                "owner_img_url": '',
+    #                "img_url": '',
+    #                "timestamp": '',
+    #                "likes": '',
+    #                "comments": ''
+    #                }
     return flask.render_template("posts.html", **context)
 
 
-@ insta485.app.route('/explore', methods=['GET'])
+@ insta485.app.route('/explore/', methods=['GET'])
 def show_explore():
     """Display /explore"""
+    if 'username' not in flask.session:
+        return flask.redirect(flask.url_for('show_login'))
 
     # Connect to database
     connection = insta485.model.get_db()
@@ -443,16 +482,35 @@ def show_explore():
         "SELECT users.username, users.filename "
         "FROM users "
         "INNER JOIN following ON "
-        "following.username2=users.username "
-        "WHERE username1 != ? ",
+        "users.username = following.username2 "
+        "WHERE following.username1 = ? ",
+        ([logname])
+    )
+    following = cur.fetchall()
+    cur = connection.execute(
+        "SELECT username, filename "
+        "FROM users "
+        "WHERE username != ? ",
         ([logname])
     )
     not_following = cur.fetchall()
+    cur = connection.execute(
+        "SELECT username, filename "
+        "FROM users "
+        "WHERE username != ? ",
+        ([logname])
+    )
+    people = cur.fetchall()
+    for follow in people:
+        for person in following:
+            if follow['username'] == person['username']:
+                not_following.remove(follow)
+
     follow_list = []
     for follow in not_following:
         follow_list.append({
-            "username": follow['users.username'],
-            "user_img_url": follow['users.filename']
+            "username": follow['username'],
+            "user_img_url": follow['filename']
         })
 
     # Add database info to context
@@ -505,7 +563,7 @@ def show_delete():
     return flask.render_template("delete.html", **context)
 
 
-@ insta485.app.route('/accounts/edit', methods=['GET'])
+@ insta485.app.route('/accounts/edit/', methods=['GET'])
 def show_edit():
     """Display /accounts/edit"""
 
@@ -523,8 +581,8 @@ def show_edit():
 
     context = {"logname": logname,
                "user_img_url": user_data[0]['filename'],
-               "fullname": user_data[1]['fullname'],
-               "email": user_data[2]['email']
+               "fullname": user_data[0]['fullname'],
+               "email": user_data[0]['email']
                }
     return flask.render_template("edit.html", **context)
 
@@ -640,41 +698,39 @@ def comments():
             "FROM comments "
             "WHERE commentid = ? "
             "AND owner = ? ",
-            (commentid, logname)
+            (commentid, logname,)
         )
         comment_check = cur.fetchall()
-        # If logman does not own comment, abort 403
-        if comment_check[0]['COUNT(*)'] == 0:
+        # If logname does not own comment, abort 403
+        if not comment_check:
             flask.abort(403)
         # Delete comment
         connection = insta485.model.get_db()
         connection.execute(
-            "DELETE FROM comments WHERE commentid = ?",
-            (commentid)
+            "DELETE FROM comments WHERE commentid = ? AND owner = ? ",
+            (commentid, logname,)
         )
 
     # Redirect to URL
-    if url:
-        return flask.redirect(url)
+    if 'target' in flask.request.args:
+        return flask.redirect(flask.request.args['target'])
     else:
         return flask.redirect(flask.url_for('show_index'))
 
 
 @ insta485.app.route('/posts/', methods=['POST'])
 def posts():
-    url = request.args.get('target')
+    url = flask.request.args.get('target')
     logname = flask.session['username']
-    postid = flask.request.form['postid']
-    # unpack flask object
-    fileobj = request.files['file']
-    filename = fileobj.filename
 
     # If the operation is create
     if flask.request.form['operation'] == 'create':
+        # unpack flask object
+        fileobj = flask.request.files['file']
+        filename = fileobj.filename
         # if the file is empty, abort 400
-        if os.path.getsize(fileobj) <= 0:
+        if not fileobj:
             flask.abort(400)
-
         # Compute base name (filename without directory).  We use a UUID to avoid
         # clashes with existing files, and ensure that the name is compatible with the
         # filesystem.
@@ -691,24 +747,36 @@ def posts():
         connection.execute(
             "INSERT INTO posts(filename, owner) "
             "VALUES (?, ?) ",
-            ([uuid_basename], [logname])
+            (uuid_basename, logname)
         )
 
     # If the operation is delete
     elif flask.request.form['operation'] == 'delete':
+        postid = flask.request.form['postid']
         # Check if logman owns post they are trying to delete
         connection = insta485.model.get_db()
-        connection.execute(
+        cur = connection.execute(
             "SELECT COUNT(*) "
             "FROM posts "
             "WHERE postid = ? "
             "AND owner = ? ",
-            ([postid], [logname])
+            (postid, logname)
         )
-        post_check = connection.fetchall()
+        post_check = cur.fetchall()
         # If logname does not own post, abort 403
         if post_check[0]['COUNT(*)'] == 0:
             flask.abort(403)
+
+        connection = insta485.model.get_db()
+        cur = connection.execute(
+            "SELECT filename "
+            "FROM posts "
+            "WHERE postid = ?",
+            (postid)
+        )
+        filename = cur.fetchall()
+        path = insta485.app.config["UPLOAD_FOLDER"]/filename[0]['filename']
+        os.remove(path)
         # Delete image file and everything related (automatically ON DELETE CASCADE)
         connection = insta485.model.get_db()
         connection.execute(
@@ -716,16 +784,16 @@ def posts():
             "WHERE postid = ? ",
             ([postid])
         )
+
 # Redirect to URL
-    if url:
-        return flask.redirect(url)
+    if 'target' in flask.request.args:
+        return flask.redirect(flask.request.args['target'])
     else:
-        return flask.redirect("/users/" + logname)
+        return flask.redirect("/users/"+logname+"/")
 
 
 @ insta485.app.route('/following/', methods=['POST'])
 def following():
-    url = request.args.get('target')
     logname = flask.session['username']
     username = flask.request.form['username']
     # TODO: is username correct?? ^^
@@ -750,7 +818,7 @@ def following():
             (logname, username)
         )
     # If the operation is unfollow
-    elif flask.request.form['operation'] == 'unfollow':
+    else:
         connection = insta485.model.get_db()
         cur = connection.execute(
             "SELECT COUNT(*) FROM following "
@@ -770,10 +838,10 @@ def following():
         )
 
     # Redirect to URL
-        if url:
-            return flask.redirect(url)
-        else:
-            return flask.redirect("/")
+    if 'target' in flask.request.args:
+        return flask.redirect(flask.request.args['target'])
+    else:
+        return flask.redirect(flask.url_for('show_index'))
 
 
 @ insta485.app.route('/accounts/', methods=['POST'])
@@ -792,7 +860,9 @@ def accounts():
             (username,)
         )
         correct_password = cur.fetchall()
-        if cur.rowcount == 0 or correct_password[0]['password'] != password:
+        if not correct_password:
+            flask.abort(403)
+        if not pass_check(password, correct_password[0]['password']):
             flask.abort(403)
         flask.session.clear
         flask.session['username'] = flask.request.form['username']
@@ -847,6 +917,7 @@ def accounts():
         path = insta485.app.config["UPLOAD_FOLDER"]/uuid_basename
         # TODO: ^^ double check if this is the right file path!
         fileobj.save(path)
+        flask.session.clear()
         flask.session['username'] = username
 
     # If the operation is follow
@@ -866,7 +937,7 @@ def accounts():
         )
         delete_posts = cur.fetchall()
         for x in delete_posts:
-            path = insta485.app.config["UPLOAD_FOLDER"]/x["filename"]
+            path = insta485.app.config["UPLOAD_FOLDER"]/x['filename']
             os.remove(path)
         # Delete user icon
         connection = insta485.model.get_db()
@@ -877,8 +948,7 @@ def accounts():
             ([logname])
         )
         delete_icon = cur.fetchall()
-        path = insta485.app.config["UPLOAD_FOLDER"] / \
-            delete_icon[0]['filename']
+        path = insta485.app.config["UPLOAD_FOLDER"]/delete_icon[0]['filename']
         os.remove(path)
         # Delete user's all related entries in all tables in database
         connection = insta485.model.get_db()
@@ -887,6 +957,7 @@ def accounts():
             "WHERE username = ? ",
             ([logname])
         )
+        flask.session.clear()
 
     # If the operation is edit account
     if flask.request.form['operation'] == 'edit_account':
@@ -971,9 +1042,18 @@ def accounts():
             ([logname])
         )
         user_password = cur.fetchall()
-        password = hash_password(password)
-        if (user_password[0]['password'] != password):
+        algorithm, salt, curpasshash = user_password[0]['password'].split('$')
+        hash_obj = hashlib.new(algorithm)
+        password_salted = salt + password
+        hash_obj.update(password_salted.encode('utf-8'))
+        newpasshash = hash_obj.hexdigest()
+
+        if not curpasshash == newpasshash:
+            print('aborted')
             flask.abort(403)
+        # if (user_password[0]['password'] != password):
+         #   "aborted"
+          #  flask.abort(403)
         # Verify both new passwords match
         if new_password1 != new_password2:
             flask.abort(401)
@@ -1004,10 +1084,19 @@ def accounts():
 # Static File Permissions
 
 
-@ insta485.app.route('/uploads/<filename>/', methods=['GET'])
+@ insta485.app.route('/uploads/<filename>', methods=['GET'])
 def show_file(filename):
     if not 'username' in flask.session:
         flask.abort(403)
     if not os.path.exists(insta485.app.config['UPLOAD_FOLDER']/filename):
         flask.abort(404)
     return flask.send_from_directory(insta485.app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
+
+
+def pass_check(new, database):
+    algorithm, salt, curpasshash = database.split('$')
+    hash_obj = hashlib.new(algorithm)
+    password_salted = salt + new
+    hash_obj.update(password_salted.encode('utf-8'))
+    newpasshash = hash_obj.hexdigest()
+    return newpasshash == curpasshash

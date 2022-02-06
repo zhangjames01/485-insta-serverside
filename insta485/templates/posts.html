@@ -33,14 +33,14 @@
     </div>
     <div class="topleft">
         <a href="/users/{{ owner }}/">
-            <img src="{{ owner_img_url }}" height=30 alt="image"> {{owner}}
+            <img src="{{url_for('show_file',filename=owner_img_url )}}" height=30 alt="image"> {{owner}}
         </a>
     </div>
 
     .
     <div class="img">
         <p>
-            <img src="{{img_url}}" width="400" alt="image">
+            <img src="{{url_for('show_file',filename=img_url)}}" width="400" alt="image">
         </p>
         <p>
             {% if likes == 1 %}
@@ -48,6 +48,31 @@
             {%else%}
             {{likes}} likes
             {%endif%}
+        </p>
+        <p>
+            {%if logname_likes %}
+            <!-- unlike button -->
+        <form action="/likes/?target=/posts/{{postid}}/" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="operation" value="unlike" />
+            <input type="hidden" name="postid" value="{{postid}}" />
+            <input type="submit" name="unlike" value="unlike" />
+        </form>
+        {%else%}
+        <!-- like button -->
+        <form action="/likes/?target=/posts/{{postid}}/" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="operation" value="like" />
+            <input type="hidden" name="postid" value="{{postid}}" />
+            <input type="submit" name="like" value="like" />
+        </form>
+        {%endif%}
+        </p>
+        <!-- comment button -->
+        <form action="/comments/?target=/posts/{{postid}}/" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="operation" value="create" />
+            <input type="hidden" name="postid" value="{{postid}}" />
+            <input type="text" name="text" required />
+            <input type="submit" name="comment" value="comment" />
+        </form>
         </p>
         {%for comment in comments%}
         <p>
@@ -57,20 +82,24 @@
             {{comment.text}}
             {%if comment.owner == logname%}
             <!-- delete comment button CHECK LATER -->
-        <form action="/comments?target=/posts/{{postid}}" method="post" enctype="multipart/form-data">
+        <form action="/comments/?target=/posts/{{postid}}/" method="post" enctype="multipart/form-data">
             <input type="hidden" name="operation" value="delete" />
             <input type="hidden" name="commentid" value="{{comment.commentid}}" />
-            </p>
-            {%endif%}
-            {%endfor%}
-            {%if logname == owner%}
-            <!-- delete this post button CHECK LATER -->
-            <form action="/posts?target=/user/posts" method="post" enctype="multipart/form-data">
-                <input type="hidden" name="operation" value="delete" />
-                <input type="hidden" name="postid" value="{{postid}}" />
-                <input type="submit" name="delete" value="delete this post" />
-            </form>
-            {%endif%}
+            <input type="submit" name="uncomment" value="delete" />
+        </form>
+        <p></p>
+        {%endif%}
+        {%endfor%}
+        {%if logname == owner%}
+        <!-- delete this post button CHECK LATER -->
+
+        <form action="/posts/?target=/users/{{logname}}/" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="operation" value="delete" />
+            <input type="hidden" name="postid" value="{{postid}}" />
+            <input type="submit" name="delete" value="delete this post" />
+        </form>
+        {%endif%}
+
     </div>
 
 </div>

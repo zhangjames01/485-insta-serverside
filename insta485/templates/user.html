@@ -31,17 +31,17 @@
     </h2>
     {%if logname == username%}
     <p>
-        <a href="/accounts/edit"> Edit profile</a>
+        <a href="/accounts/edit/"> Edit profile</a>
     </p>
     <p>
-    <form action="</accounts/login>" method="post" enctype="multipart/form-data">
+    <form action="</accounts/login/>" method="post" enctype="multipart/form-data">
         <input type="submit" name="logout" value="Logout" />
     </form>
     </p>
     {%elif logname_follows_username%}
     <p>
-        not following
-    <form action="/following?target=/users/{{username}}/following" method="post" enctype="multipart/form-data">
+        following
+    <form action="/following/?target=/users/{{username}}/" method="post" enctype="multipart/form-data">
         <input type="submit" name="unfollow" value="unfollow" />
         <input type="hidden" name="username" value="{{username}}" />
         <input type="hidden" name="operation" value="unfollow" />
@@ -50,8 +50,8 @@
     {%else%}
 
     <p>
-        following
-    <form action="/following?target=/users/{{username}}/following" method="post" enctype="multipart/form-data">
+        not following
+    <form action="/following/?target=/users/{{username}}/" method="post" enctype="multipart/form-data">
         <input type="submit" name="follow" value="follow" />
         <input type="hidden" name="username" value="{{username}}" />
         <input type="hidden" name="operation" value="follow" />
@@ -85,7 +85,8 @@
     {%endif%}
     {%for post in posts%}
     <p>
-        <a href="/posts/{{post.postid}}/"> <img src="{{post.img_url}}" height="180" alt="image"></a>
+        <a href="/posts/{{post.postid}}/"> <img src="{{url_for('show_file',filename=post.img_url)}}" height="180"
+                alt="image"></a>
     </p>
     {%endfor%}
 
