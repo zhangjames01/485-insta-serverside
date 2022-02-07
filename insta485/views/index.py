@@ -731,8 +731,10 @@ def posts():
         # if the file is empty, abort 400
         if not fileobj:
             flask.abort(400)
-        # Compute base name (filename without directory).  We use a UUID to avoid
-        # clashes with existing files, and ensure that the name is compatible with the
+        # Compute base name (filename without directory).
+        # We use a UUID to avoid
+        # clashes with existing files, and
+        # ensure that the name is compatible with the
         # filesystem.
         stem = uuid.uuid4().hex
         suffix = pathlib.Path(filename).suffix
@@ -777,7 +779,6 @@ def posts():
         filename = cur.fetchall()
         path = insta485.app.config["UPLOAD_FOLDER"]/filename[0]['filename']
         os.remove(path)
-        # Delete image file and everything related (automatically ON DELETE CASCADE)
         connection = insta485.model.get_db()
         connection.execute(
             "DELETE FROM posts "
@@ -876,14 +877,15 @@ def accounts():
         # unpack flask object
         fileobj = flask.request.files['file']
         filename = fileobj.filename
-        # Compute base name (filename without directory).  We use a UUID to avoid
-        # clashes with existing files, and ensure that the name is compatible with the
+
         # filesystem.
         stem = uuid.uuid4().hex
         suffix = pathlib.Path(filename).suffix
         uuid_basename = f"{stem}{suffix}"
         # if any of the fields are empty, abort 400
-        if username == "" or password == "" or fullname == "" or email == "" or uuid_basename == "":
+        if username == "" or password == "" or fullname == "":
+            flask.abort(400)
+        if email == "" or uuid_basename == "":
             flask.abort(400)
         connection = insta485.model.get_db()
         cur = connection.execute(
@@ -965,8 +967,11 @@ def accounts():
             flask.abort(403)
 
         logname = flask.session['username']
-        # If fullname or email fields are empty, abort
-        if not flask.request.form['fullname'] or not flask.request.form['email']:
+        # If fullname or email
+        # fields are empty, abort
+        if not flask.request.form['fullname']:
+            flask.abort(400)
+        if not flask.request.form['email']:
             flask.abort(400)
 
         # If no photo file is included
@@ -989,8 +994,10 @@ def accounts():
             # unpack flask object
             fileobj = flask.request.files['file']
             filename = fileobj.filename
-            # Compute base name (filename without directory).  We use a UUID to avoid
-            # clashes with existing files, and ensure that the name is compatible with the
+            # Compute base name (filename without directory).
+            # We use a UUID to avoid
+            # clashes with existing files, and ensure
+            # that the name is compatible with the
             # filesystem.
             stem = uuid.uuid4().hex
             suffix = pathlib.Path(filename).suffix
@@ -1027,7 +1034,11 @@ def accounts():
             flask.abort(403)
         logname = flask.session['username']
         # If any of the field are empty, abort
-        if not flask.request.form['password'] or not flask.request.form['new_password1'] or not flask.request.form['new_password2']:
+        if not flask.request.form['password']:
+            flask.abort(400)
+        if not flask.request.form['new_password1']:
+            flask.abort(400)
+        if not flask.request.form['new_password2']:
             flask.abort(400)
 
         password = flask.request.form['password']
@@ -1051,10 +1062,10 @@ def accounts():
         if not curpasshash == newpasshash:
             print('aborted')
             flask.abort(403)
-        # if (user_password[0]['password'] != password):
-         #   "aborted"
-          #  flask.abort(403)
-        # Verify both new passwords match
+            # if (user_password[0]['password'] != password):
+            # "aborted"
+            # flask.abort(403)
+            # Verify both new passwords match
         if new_password1 != new_password2:
             flask.abort(401)
 
@@ -1086,11 +1097,12 @@ def accounts():
 
 @ insta485.app.route('/uploads/<filename>', methods=['GET'])
 def show_file(filename):
-    if not 'username' in flask.session:
+    if 'username' not in flask.session:
         flask.abort(403)
     if not os.path.exists(insta485.app.config['UPLOAD_FOLDER']/filename):
         flask.abort(404)
-    return flask.send_from_directory(insta485.app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
+    return flask.send_from_directory(insta485.app.config['UPLOAD_FOLDER'],
+                                     filename, as_attachment=True)
 
 
 def pass_check(new, database):

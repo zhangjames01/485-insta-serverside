@@ -3,7 +3,8 @@ import pathlib
 # Root of this application, useful if it doesn't occupy an entire domain
 APPLICATION_ROOT = '/'
 # Secret key for encrypting cookies
-SECRET_KEY = b'r\xa9\xf7\xcd\x94\xcf\xdds\xbd\xa4\x1dc\xd6\xef\x014\xc2P~f\x9f\xd8\x1fN'
+SECRET_KEY = b'r\xa9\xf7\
+    xcd\x94\xcf\xdds\xbd\xa4\x1dc\xd6\xef\x014\xc2P~f\x9f\xd8\x1fN'
 SESSION_COOKIE_NAME = 'login'
 # File Upload to var/uploads/
 INSTA485_ROOT = pathlib.Path(__file__).resolve().parent.parent
