@@ -210,7 +210,8 @@ def show_users(username):
     cur = connection.execute(
         "SELECT postid, filename "
         "FROM posts "
-        "WHERE owner = ? ",
+        "WHERE owner = ? "
+        "ORDER BY postid DESC ",
         ([username])
     )
     posts_data = cur.fetchall()
@@ -930,6 +931,7 @@ def accounts():
             "WHERE username = ? ",
             ([logname])
         )
+        connection.commit()
         flask.session.clear()
 
     # If the operation is edit account

@@ -26,11 +26,11 @@
 </div>
 
 <div>
-    <img src="{{user_img_url}}" height=30 alt="image">{{logname}}
+    <img src="{{url_for('show_file',filename=user_img_url)}}" height=30 alt="image">{{logname}}
 </div>
 
 <div>
-    <form action="/accounts?target=/accounts/edit" method="post" enctype="multipart/form-data">
+    <form action="/accounts/?target=/accounts/edit/" method="post" enctype="multipart/form-data">
         <input type="file" name="file" accept="image/*" />
         <input type="text" name="fullname" value="{{fullname}}" required />
         <input type="text" name="email" value="{{email}}" required />
