@@ -4,15 +4,13 @@ Insta485 index (main) view.
 URLs include:
 /
 """
-from crypt import methods
-import flask
-import insta485
-from flask import request
 import os
 import pathlib
-import uuid
 import hashlib
+import uuid
 import arrow
+import flask
+import insta485
 
 # /
 
@@ -38,7 +36,7 @@ def show_index():
         (logname, logname)
     )
     post_data = cur.fetchall()
-    posts = []
+    posts_list = []
 
     connection = insta485.model.get_db()
     cur = connection.execute(
@@ -120,19 +118,19 @@ def show_index():
         for comment in comments_data:
             comment_list.append({"owner": comment['owner'],
                                  "text": comment['text']})
-        posts.append({"postid": post['postid'],
-                      "owner": post['owner'],
-                      "owner_img_url": user_file['filename'],
-                      "img_url": file['filename'],
-                      "timestamp": arrow.get(post['created']).humanize(),
-                      "likes": likes_data[0]['COUNT(*)'],
-                      "comments": comment_list,
-                      "logname_likes": logname_likes
-                      })
+        posts_list.append({"postid": post['postid'],
+                           "owner": post['owner'],
+                           "owner_img_url": user_file['filename'],
+                           "img_url": file['filename'],
+                           "timestamp": arrow.get(post['created']).humanize(),
+                           "likes": likes_data[0]['COUNT(*)'],
+                           "comments": comment_list,
+                           "logname_likes": logname_likes
+                           })
 
     # Add database info to context
     context = {"logname": logname,
-               "posts": posts}
+               "posts": posts_list}
     return flask.render_template("index.html", **context)
 
 
@@ -152,7 +150,7 @@ def show_users(username):
         ([username])
     )
     status = cur.fetchall()
-    if (status[0]["COUNT(*)"] == 0):
+    if status[0]["COUNT(*)"] == 0:
         flask.abort(404)
 
     # query
@@ -215,13 +213,13 @@ def show_users(username):
         "WHERE owner = ? ",
         ([username])
     )
-    posts = cur.fetchall()
+    posts_data = cur.fetchall()
 
     # add database info to context
 
     # make list for
     posts_list = []
-    for post in posts:
+    for post in posts_data:
         posts_list.append({
             "postid": post['postid'],
             "img_url": post['filename']
@@ -257,12 +255,12 @@ def show_followers(username):
         ([username])
     )
     status = cur.fetchall()
-    if (status[0]['COUNT(*)'] == 0):
+    if status[0]['COUNT(*)'] == 0:
         flask.abort(404)
 
     # Query database
 
-    # TODO: Add into context
+    # : Add into context
 
     logname = flask.session['username']
     cur = connection.execute(
@@ -324,7 +322,7 @@ def show_following(username):
         ([username])
     )
     status = cur.fetchall()
-    if (status[0]["COUNT(*)"] == 0):
+    if status[0]["COUNT(*)"] == 0:
         flask.abort(404)
 
     # Query database
@@ -337,7 +335,7 @@ def show_following(username):
         ([username])
     )
     peoplefollowed = cur.fetchall()
-    following = []
+    following_list = []
     for follow in peoplefollowed:
         cur = connection.execute(
             "SELECT COUNT(*) "
@@ -352,15 +350,15 @@ def show_following(username):
             if person['COUNT(*)'] != 0:
                 count = 1
         if count == 1:
-            following.append({"username": follow['username2'],
-                              "logname_follows_username": True,
-                              "user_img_url": follow['filename']})
+            following_list.append({"username": follow['username2'],
+                                   "logname_follows_username": True,
+                                   "user_img_url": follow['filename']})
         else:
-            following.append({"username": follow['username2'],
-                              "logname_follows_username": False,
-                              "user_img_url": follow['filename']})
+            following_list.append({"username": follow['username2'],
+                                   "logname_follows_username": False,
+                                   "user_img_url": follow['filename']})
 
-    context = {"following": following,
+    context = {"following": following_list,
                "username": username,
                "logname": logname}
     return flask.render_template("following.html", **context)
@@ -419,7 +417,7 @@ def show_post(postid):
         "WHERE postid = ? ",
         ([postid])
     )
-    comments = cur.fetchall()
+    comments_list = cur.fetchall()
 
     connection = insta485.model.get_db()
     cur = connection.execute(
@@ -435,7 +433,7 @@ def show_post(postid):
         logname_likes = True
 
     comment_list = []
-    for comment in comments:
+    for comment in comments_list:
         comment_list.append({"owner": comment['owner'],
                             "text": comment['text'],
                              "commentid": comment['commentid']})
@@ -472,7 +470,7 @@ def show_explore():
         "WHERE following.username1 = ? ",
         ([logname])
     )
-    following = cur.fetchall()
+    following_list = cur.fetchall()
     cur = connection.execute(
         "SELECT username, filename "
         "FROM users "
@@ -488,7 +486,7 @@ def show_explore():
     )
     people = cur.fetchall()
     for follow in people:
-        for person in following:
+        for person in following_list:
             if follow['username'] == person['username']:
                 not_following.remove(follow)
 
@@ -510,11 +508,9 @@ def show_explore():
 @ insta485.app.route('/accounts/login/', methods=['GET'])
 def show_login():
     """Display /accounts/login."""
-    connection = insta485.model.get_db()
     if 'username' in flask.session:
         return flask.redirect(flask.url_for('show_index'))
-    else:
-        return flask.render_template("login.html")
+    return flask.render_template("login.html")
 
 
 @ insta485.app.route('/accounts/logout/', methods=['POST'])
@@ -528,11 +524,9 @@ def show_logout():
 def show_create():
     """Display /accounts/create."""
     # Connect to database
-    connection = insta485.model.get_db()
     if flask.session.get('username'):
         return flask.redirect(flask.url_for('show_edit'))
-    else:
-        return flask.render_template("create.html")
+    return flask.render_template("create.html")
 
 
 @ insta485.app.route('/accounts/delete/', methods=['GET'])
@@ -595,7 +589,7 @@ def likes():
         )
         liked = cur.fetchall()
         # If user has already liked post, abort 409
-        if (liked[0]['COUNT(*)'] != 0):
+        if liked[0]['COUNT(*)'] != 0:
             flask.abort(409)
         connection = insta485.model.get_db()
         # Create like for postid
@@ -618,7 +612,7 @@ def likes():
         )
         liked = cur.fetchall()
         # If user has not liked post yet, abort 409
-        if (liked[0]['COUNT(*)'] == 0):
+        if liked[0]['COUNT(*)'] == 0:
             flask.abort(409)
         # Delete like for postid
         connection = insta485.model.get_db()
@@ -632,8 +626,7 @@ def likes():
     # Redirect to URL
     if url:
         return flask.redirect(url)
-    else:
-        return flask.redirect(flask.url_for('show_index'))
+    return flask.redirect(flask.url_for('show_index'))
 
 
 def hash_password(password):
@@ -651,7 +644,6 @@ def hash_password(password):
 @ insta485.app.route('/comments/', methods=['POST'])
 def comments():
     """Display function."""
-    url = flask.request.args.get('target')
     logname = flask.session['username']
 
     # If the operation is create
@@ -695,14 +687,12 @@ def comments():
     # Redirect to URL
     if 'target' in flask.request.args:
         return flask.redirect(flask.request.args['target'])
-    else:
-        return flask.redirect(flask.url_for('show_index'))
+    return flask.redirect(flask.url_for('show_index'))
 
 
 @ insta485.app.route('/posts/', methods=['POST'])
 def posts():
     """Display function."""
-    url = flask.request.args.get('target')
     logname = flask.session['username']
 
     # If the operation is create
@@ -723,7 +713,7 @@ def posts():
         uuid_basename = f"{stem}{suffix}"
         # Save to disk
         path = insta485.app.config["UPLOAD_FOLDER"]/uuid_basename
-        # TODO: ^^ double check if this is the right file path!
+        # : ^^ double check if this is the right file path!
         fileobj.save(path)
 
         # add filename to database
@@ -771,8 +761,7 @@ def posts():
 # Redirect to URL
     if 'target' in flask.request.args:
         return flask.redirect(flask.request.args['target'])
-    else:
-        return flask.redirect("/users/"+logname+"/")
+    return flask.redirect("/users/"+logname+"/")
 
 
 @ insta485.app.route('/following/', methods=['POST'])
@@ -780,7 +769,6 @@ def following():
     """Display function."""
     logname = flask.session['username']
     username = flask.request.form['username']
-    # TODO: is username correct?? ^^
 
     # If the operation is follow
     if flask.request.form['operation'] == 'follow':
@@ -824,8 +812,7 @@ def following():
     # Redirect to URL
     if 'target' in flask.request.args:
         return flask.redirect(flask.request.args['target'])
-    else:
-        return flask.redirect(flask.url_for('show_index'))
+    return flask.redirect(flask.url_for('show_index'))
 
 
 @ insta485.app.route('/accounts/', methods=['POST'])
@@ -849,7 +836,7 @@ def accounts():
             flask.abort(403)
         if not pass_check(password, correct_password[0]['password']):
             flask.abort(403)
-        flask.session.clear
+        flask.session.clear()
         flask.session['username'] = flask.request.form['username']
 
     # If the operation is create
@@ -901,7 +888,7 @@ def accounts():
         )
         # Save to disks
         path = insta485.app.config["UPLOAD_FOLDER"]/uuid_basename
-        # TODO: ^^ double check if this is the right file path!
+        # : ^^ double check if this is the right file path!
         fileobj.save(path)
         flask.session.clear()
         flask.session['username'] = username
@@ -922,8 +909,8 @@ def accounts():
             ([logname])
         )
         delete_posts = cur.fetchall()
-        for x in delete_posts:
-            path = insta485.app.config["UPLOAD_FOLDER"]/x['filename']
+        for slay_c in delete_posts:
+            path = insta485.app.config["UPLOAD_FOLDER"]/slay_c['filename']
             os.remove(path)
         # Delete user icon
         connection = insta485.model.get_db()
@@ -1073,8 +1060,7 @@ def accounts():
     # Redirect to URL
     if 'target' in flask.request.args:
         return flask.redirect(flask.request.args['target'])
-    else:
-        return flask.redirect(flask.url_for('show_index'))
+    return flask.redirect(flask.url_for('show_index'))
 
 # Static File Permissions
 
