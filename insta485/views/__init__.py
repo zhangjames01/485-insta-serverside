@@ -1,3 +1,4 @@
+"""Insta485 package initializer."""
 from insta485.views.index import show_file
 from insta485.views.index import accounts
 from insta485.views.index import following

@@ -1,5 +1,6 @@
 """
 Insta485 index (main) view.
+
 URLs include:
 /
 """
@@ -137,8 +138,7 @@ def show_index():
 
 @ insta485.app.route('/users/<username>/', methods=['GET'])
 def show_users(username):
-    """Display /users/<user_url_slug>"""
-
+    """Display /users/<user_url_slug>."""
     if 'username' not in flask.session:
         return flask.redirect(flask.url_for('show_login'))
     # connect to database
@@ -241,8 +241,7 @@ def show_users(username):
 
 @ insta485.app.route('/users/<username>/followers/', methods=['GET'])
 def show_followers(username):
-    """Display /users/<user_url_slug>/followers"""
-
+    """Display /users/<user_url_slug>/followers."""
     # Connect to database
     if 'username' not in flask.session:
         return flask.redirect(flask.url_for('show_login'))
@@ -310,8 +309,7 @@ def show_followers(username):
 
 @ insta485.app.route('/users/<username>/following/', methods=['GET'])
 def show_following(username):
-    """Display /users/<user_url_slug>/following"""
-
+    """Display /users/<user_url_slug>/following."""
     if 'username' not in flask.session:
         return flask.redirect(flask.url_for('show_login'))
 
@@ -370,8 +368,7 @@ def show_following(username):
 
 @ insta485.app.route('/posts/<postid>/', methods=['GET'])
 def show_post(postid):
-    """Display /posts/<postid_url_slug>"""
-
+    """Display /posts/<postid_url_slug>."""
     if 'username' not in flask.session:
         return flask.redirect(flask.url_for('show_login'))
 
@@ -453,23 +450,12 @@ def show_post(postid):
                "comments": comment_list,
                "logname_likes": logname_likes
                }
-    # else:
-    #     return flask.redirect(flask.url_for('show_index'))
-    #     context = {"logname": logname,
-    #                "postid": postid,
-    #                "owner": '',
-    #                "owner_img_url": '',
-    #                "img_url": '',
-    #                "timestamp": '',
-    #                "likes": '',
-    #                "comments": ''
-    #                }
     return flask.render_template("posts.html", **context)
 
 
 @ insta485.app.route('/explore/', methods=['GET'])
 def show_explore():
-    """Display /explore"""
+    """Display /explore."""
     if 'username' not in flask.session:
         return flask.redirect(flask.url_for('show_login'))
 
@@ -516,18 +502,14 @@ def show_explore():
     # Add database info to context
     context = {"logname": logname,
                "not_following": follow_list
-               # [
-               #  {"username": not_following[0]['users.username'],
-               #    "user_img_url": not_following[1]['users.filename']}
-               # ]
+
                }
     return flask.render_template("explore.html", **context)
 
 
 @ insta485.app.route('/accounts/login/', methods=['GET'])
 def show_login():
-    """Display /accounts/login"""
-
+    """Display /accounts/login."""
     connection = insta485.model.get_db()
     if 'username' in flask.session:
         return flask.redirect(flask.url_for('show_index'))
@@ -537,15 +519,14 @@ def show_login():
 
 @ insta485.app.route('/accounts/logout/', methods=['POST'])
 def show_logout():
-    """Display /accounts/logout"""
+    """Display /accounts/logout."""
     flask.session.clear()
     return flask.redirect(flask.url_for('show_login'))
 
 
 @ insta485.app.route('/accounts/create/', methods=['GET'])
 def show_create():
-    """Display /accounts/create"""
-
+    """Display /accounts/create."""
     # Connect to database
     connection = insta485.model.get_db()
     if flask.session.get('username'):
@@ -556,7 +537,7 @@ def show_create():
 
 @ insta485.app.route('/accounts/delete/', methods=['GET'])
 def show_delete():
-    """Display /accounts/delete"""
+    """Display /accounts/delete."""
     logname = flask.session['username']
 
     context = {"logname": logname}
@@ -565,8 +546,7 @@ def show_delete():
 
 @ insta485.app.route('/accounts/edit/', methods=['GET'])
 def show_edit():
-    """Display /accounts/edit"""
-
+    """Display /accounts/edit."""
     # Connect to database
     connection = insta485.model.get_db()
 
@@ -589,8 +569,7 @@ def show_edit():
 
 @ insta485.app.route('/accounts/password/', methods=['GET'])
 def show_password():
-    """DISPLAY /accounts/password"""
-
+    """DISPLAY /accounts/password."""
     logname = flask.session['username']
     context = {"logname": logname}
     return flask.render_template("password.html", **context)
@@ -599,7 +578,7 @@ def show_password():
 # POST methods
 @ insta485.app.route('/likes/', methods=['POST'])
 def likes():
-    """Display /"""
+    """Display /."""
     url = flask.request.args.get('target')
     logname = flask.session['username']
 
@@ -658,6 +637,7 @@ def likes():
 
 
 def hash_password(password):
+    """Hash the password."""
     algorithm = 'sha512'
     salt = uuid.uuid4().hex
     hash_obj = hashlib.new(algorithm)
@@ -670,6 +650,7 @@ def hash_password(password):
 
 @ insta485.app.route('/comments/', methods=['POST'])
 def comments():
+    """Display function."""
     url = flask.request.args.get('target')
     logname = flask.session['username']
 
@@ -720,6 +701,7 @@ def comments():
 
 @ insta485.app.route('/posts/', methods=['POST'])
 def posts():
+    """Display function."""
     url = flask.request.args.get('target')
     logname = flask.session['username']
 
@@ -795,6 +777,7 @@ def posts():
 
 @ insta485.app.route('/following/', methods=['POST'])
 def following():
+    """Display function."""
     logname = flask.session['username']
     username = flask.request.form['username']
     # TODO: is username correct?? ^^
@@ -847,6 +830,7 @@ def following():
 
 @ insta485.app.route('/accounts/', methods=['POST'])
 def accounts():
+    """Display function."""
     # If the operation is login
     if flask.request.form['operation'] == 'login':
         username = flask.request.form['username']
@@ -1097,6 +1081,7 @@ def accounts():
 
 @ insta485.app.route('/uploads/<filename>', methods=['GET'])
 def show_file(filename):
+    """Display function."""
     if 'username' not in flask.session:
         flask.abort(403)
     if not os.path.exists(insta485.app.config['UPLOAD_FOLDER']/filename):
@@ -1106,6 +1091,7 @@ def show_file(filename):
 
 
 def pass_check(new, database):
+    """Display pass_check."""
     algorithm, salt, curpasshash = database.split('$')
     hash_obj = hashlib.new(algorithm)
     password_salted = salt + new
