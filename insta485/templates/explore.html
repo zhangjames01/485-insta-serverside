@@ -26,15 +26,15 @@
 </div>
 <div>
     {%for follow in not_following%}
-    <p>
+    <div>
         <a href="/users/{{follow.username}}/">
             <img src="{{url_for('show_file', filename=follow.user_img_url)}}" height=30 alt="image">{{follow.username}}
         </a>
-    <form action="/following/?target=/explore/" method="post" enctype="multipart/form-data">
-        <input type="submit" name="follow" value="follow" />
-        <input type="hidden" name="username" value="{{follow.username}}" />
-        <input type="hidden" name="operation" value="follow" />
-    </form>
-    </p>
+        <form action="/following/?target=/explore/" method="post" enctype="multipart/form-data">
+            <input type="submit" name="follow" value="follow" />
+            <input type="hidden" name="username" value="{{follow.username}}" />
+            <input type="hidden" name="operation" value="follow" />
+        </form>
+    </div>
     {%endfor%}
 </div>

@@ -25,26 +25,26 @@
     </a>
 </div>
 
-<p>
+<div>
     <img src="{{user_img_url}}" height=30 alt="image">{{logname}}
-</p>
+</div>
 
-<p>
-<form action="/accounts?target=/accounts/edit" method="post" enctype="multipart/form-data">
-    <input type="file" name="file" accept="image/*" />
-    <input type="text" name="fullname" value="{{fullname}}" required />
-    <input type="text" name="email" value="{{email}}" required />
-    <input type="submit" name="update" value="submit" />
-    <input type="hidden" name="operation" value="edit_account" />
-</form>
-</p>
-<p>
+<div>
+    <form action="/accounts?target=/accounts/edit" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept="image/*" />
+        <input type="text" name="fullname" value="{{fullname}}" required />
+        <input type="text" name="email" value="{{email}}" required />
+        <input type="submit" name="update" value="submit" />
+        <input type="hidden" name="operation" value="edit_account" />
+    </form>
+</div>
+<div>
     <a href="/accounts/password/">
         Change password
     </a>
-</p>
-<p>
+</div>
+<div>
     <a href="/accounts/delete/">
         Delete account
     </a>
-</p>
+</div>

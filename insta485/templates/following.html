@@ -28,37 +28,37 @@
     following
     {%for follow in following%}
     {%if logname == follow.username%}
-    <p>
+    <div>
         <a href="/users/{{follow.username}}/">
             <img src="{{url_for('show_file',filename=follow.user_img_url)}}" height=30 alt="image">{{follow.username}}
         </a>
-    </p>
+    </div>
     {%elif follow.logname_follows_username%}
-    <p>
+    <div>
         <a href="/users/{{follow.username}}/">
             <img src="{{url_for('show_file',filename=follow.user_img_url)}}" height=30 alt="image">{{follow.username}}
         </a>
         following
         <!-- DO NOT CHANGE THIS (aside from where we say 'FIXME') -->
-    <form action="/following/?target=/users/{{username}}/following/" method="post" enctype="multipart/form-data">
-        <input type="submit" name="unfollow" value="unfollow" />
-        <input type="hidden" name="username" value="{{follow.username}}" />
-        <input type="hidden" name="operation" value="unfollow" />
-    </form>
-    </p>
+        <form action="/following/?target=/users/{{username}}/following/" method="post" enctype="multipart/form-data">
+            <input type="submit" name="unfollow" value="unfollow" />
+            <input type="hidden" name="username" value="{{follow.username}}" />
+            <input type="hidden" name="operation" value="unfollow" />
+        </form>
+    </div>
     {%else%}
-    <p>
+    <div>
         <a href="/users/{{follow.username}}/">
             <img src="{{url_for('show_file',filename=follow.user_img_url)}}" height=30 alt="image">{{follow.username}}
         </a>
         not following
         <!-- DO NOT CHANGE THIS (aside from where we say 'FIXME') -->
-    <form action="/following/?target=/users/{{username}}/following/" method="post" enctype="multipart/form-data">
-        <input type="submit" name="follow" value="follow" />
-        <input type="hidden" name="username" value="{{follow.username}}" />
-        <input type="hidden" name="operation" value="follow" />
-    </form>
-    </p>
+        <form action="/following/?target=/users/{{username}}/following/" method="post" enctype="multipart/form-data">
+            <input type="submit" name="follow" value="follow" />
+            <input type="hidden" name="username" value="{{follow.username}}" />
+            <input type="hidden" name="operation" value="follow" />
+        </form>
+    </div>
     {%endif%}
     {%endfor%}
 </div>
